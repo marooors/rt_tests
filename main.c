@@ -4,9 +4,9 @@
 #include <stdbool.h>
 
 int main(void) {
-    	struct timespec ts;
+    struct timespec ts;
 	struct timespec ts2;
-
+    
 	size_t attempts = 100000000;
 	uint64_t wcet = 0;
 	for(size_t i = 0; i < attempts; i++)

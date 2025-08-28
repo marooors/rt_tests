@@ -16,7 +16,7 @@ void print_statistics()
 {
     for(size_t i = 0; i < array_size; i++)
     {
-         if(values[i]) printf("[%d ns] %d\n", i*resolution, values[i]);
+         if(values[i]) printf("[%lu ns] %lu\n", i*resolution, values[i]);
     }
 
     exit(0);
@@ -40,7 +40,7 @@ int main(void) {
     if(values == NULL) return 1;
     memset(values, 0, array_size * sizeof(uint64_t));
 
-	size_t attempts = 1000000000;
+	size_t attempts = 1000000000000000;
 
     uint64_t current = -1;
     bool val1 = false;

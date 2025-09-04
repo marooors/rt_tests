@@ -7,7 +7,7 @@
 #include <sys/mman.h> // necessary for mlockall
 #include <signal.h>
 
-uint64_t resolution = 1000; // 1 = ns, 1000 = us, 1000000 = ms
+uint64_t resolution = 100; // 1 = ns, 1000 = us, 1000000 = ms
 uint64_t expected_wcet = 80000;
 uint64_t* values;
 uint64_t array_size;
@@ -53,7 +53,7 @@ int main(void) {
         if(current != -1)
         {
             uint64_t cet = now-current;
-            if(cet / resolution > array_size)
+            if(cet / resolution >= array_size)
             {
                 values[array_size-1] += 1;
             } else

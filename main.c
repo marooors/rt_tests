@@ -35,7 +35,7 @@ int main(void) {
     struct timespec ts;
      
     array_size = expected_wcet / resolution;
-    values = malloc(sizeof(uint64_t) * array_size);
+    values = malloc(sizeof(uint64_t) * array_size); /*  values = (uint64_t*) aligned_alloc(4096, sizeof(uint64_t) * array_size); */
     
     if(values == NULL) return 1;
     memset(values, 0, array_size * sizeof(uint64_t));

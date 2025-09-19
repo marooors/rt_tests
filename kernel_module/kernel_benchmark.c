@@ -27,10 +27,13 @@ MODULE_AUTHOR("roma479");
 MODULE_DESCRIPTION("-");
 MODULE_LICENSE("GPL");
 
-#define ARRAY_SIZE (EXPECTED_WCET / RESOLUTION + 1)
-static s64 latencies[ARRAY_SIZE];
+#define LATENCY_ARRAY_SIZE (EXPECTED_WCET / RESOLUTION + 1)
+static s64 latencies[LATENCY_ARRAY_SIZE];
 static struct dentry *debugfs_dir;
 static struct dentry *debugfs_file;
+
+void record_latency(s64 nsecs);
+void print_latencies(void);
 
 static ssize_t histogram_read(struct file *file, char __user* buffer, size_t count, loff_t* offset)
 {
@@ -74,14 +77,14 @@ static ssize_t histogram_read(struct file *file, char __user* buffer, size_t cou
     {
         (*offset)++;
     }
-    if(*offset >= ARRAY_SIZE)
+    if(*offset >= LATENCY_ARRAY_SIZE)
     {
          return 0;
     }
 
     if(1)//latencies[*offset])
     {
-        int len = snprintf(buf, sizeof(buf), "[%ld ns] %lld\n", (*offset)*RESOLUTION, latencies[*offset]);//latencies[i]);
+        int len = snprintf(buf, sizeof(buf), "[%lld ns] %lld\n", (*offset)*RESOLUTION, latencies[*offset]);//latencies[i]);
         if(copy_to_user(buffer, buf, len))
         {
             pr_info("copy to user failed\n");
@@ -116,17 +119,17 @@ static const struct file_operations fops = {
 void record_latency(s64 nsecs)
 {
     s64 index = nsecs / RESOLUTION;
-    if(index > ARRAY_SIZE)
-        index = ARRAY_SIZE-1;
+    if(index > LATENCY_ARRAY_SIZE)
+        index = LATENCY_ARRAY_SIZE-1;
 
     latencies[index]++;
 }
 
 void print_latencies(void)
 {
-    for(u64 i = 0; i < ARRAY_SIZE; i++)
+    for(u64 i = 0; i < LATENCY_ARRAY_SIZE; i++)
     {
-        if(latencies[i]) printk(KERN_INFO "[%ld ns] %lld\n", i*RESOLUTION, latencies[i]);
+        if(latencies[i]) printk(KERN_INFO "[%llu ns] %lld\n", i*RESOLUTION, latencies[i]);
     }
 }
 

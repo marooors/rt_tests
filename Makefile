@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -O0 -Wall
+CFLAGS = -O3 -Wall
 output: main
 	./main
 build: build.o

@@ -9,3 +9,5 @@ python3 visualize.py data.txt Tests && scp data_output.png mario@fedora:/home/ma
 
 TODO:
 * Visualisation koennte auch Anzahl Messungen insgesamt noch anzeigen
+* Optionen um mehrere CPUs gleichzeitig zu testen -> Schnellere Ergebnisse
+* Python Suite fuer automatische Tests und Plots?

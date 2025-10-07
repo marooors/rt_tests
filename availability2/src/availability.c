@@ -50,7 +50,8 @@ int main() {
 		start = read_tsc();
         end   = read_tscp();
 		diff  = (end-start) / frequencyDivisor;  // diff in selected slot size
-		if (diff < HIST_SIZE) {
+		if(i < testRuns*0.1) continue;
+        if (diff < HIST_SIZE) {
 			histo[diff]++;
 		} else {
 			if ( OVERF_SIZE > overflows ) {

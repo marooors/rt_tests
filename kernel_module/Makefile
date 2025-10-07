@@ -1,4 +1,4 @@
-obj-m += kernel_benchmark.o
+obj-m += kernel_benchmark_tscp.o
 CONFIG_MODULE_SIG=n # fix tainted kernel https://stackoverflow.com/questions/24975377/kvm-module-verification-failed-signature-and-or-required-key-missing-taintin
 PWD := $(CURDIR)
 

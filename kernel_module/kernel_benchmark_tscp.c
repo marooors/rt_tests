@@ -44,7 +44,7 @@ static atomic_t trigger_flag = ATOMIC_INIT(0);
 static int cpu_target = 9; // gewünschte CPU (z.B. 0)
 void record_latency(s64);
 void print_latencies(void);
-
+uint64_t getCpuFrequency (void);
 void record_latency(s64 nsecs)
 {
     s64 index = nsecs / RESOLUTION;
@@ -164,12 +164,12 @@ uint64_t getCpuFrequency (void) {
     for ( int i=0 ; i<TEST_RUNS ; i++ ) {
         mean += results[i];
                 #ifdef DEBUG
-                printk(KERN_INFO "getCpuFrequency(): value %2i: %lu\n", i, results[i]);
+                printk(KERN_INFO "getCpuFrequency(): value %2i: %llu\n", i, results[i]);
                 #endif
     }
     mean = mean / TEST_RUNS;
         #ifdef DEBUG
-                printk (KERN_INFO "getCpuFrequency(): returning %lu\n", mean );
+                printk (KERN_INFO "getCpuFrequency(): returning %llu\n", mean );
         #endif
 
     return mean;
@@ -196,7 +196,7 @@ static int measure_fn(void *data)
             uint32_t  frequencyDivisor = 0;  
             cpuFrequency     = getCpuFrequency();
             frequencyDivisor = (cpuFrequency) / (1000*1000*1000);
-            printk(KERN_INFO "main(): received cpuFrequency: %lu calculated frequencyDivisor: %u\n",
+            printk(KERN_INFO "main(): received cpuFrequency: %llu calculated frequencyDivisor: %u\n",
                                          cpuFrequency,                frequencyDivisor );
             ct_idle_enter();
             //disable_percpu_irq(0);
@@ -229,7 +229,7 @@ static int measure_fn(void *data)
                 record_latency(diff);
             }
             ct_idle_exit();
-            printk(KERN_INFO "t1 and t2 %lu %lu", t1, t2);
+            printk(KERN_INFO "t1 and t2 %llu %llu", t1, t2);
             //enable_percpu_irq(0, IRQ_TYPE_NONE);
             //local_irq_enable();
             //preempt_enable();

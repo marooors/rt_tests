@@ -11,22 +11,50 @@
 #include "availability.h"
 #include "setupRtThread.h"
 #include "getCpuFrequency.h"
-
+#include <signal.h>
 uint64_t  cpuFrequency;
 uint32_t  frequencyDivisor;       
+uint32_t diff;
+uint64_t histo[HIST_SIZE] = {0};
+uint64_t testRuns;
+uint32_t overflows=0;
+ov_type  ovValue[OVERF_SIZE];
+uint64_t start, end;
+struct timespec startTime,endTime;
+uint64_t nsDuration;
+double avg_sec_per_testRun, sec_per_histSlot;
+
+
+void print_histogram() {
+    sec_per_histSlot = 1.*frequencyDivisor / cpuFrequency;
+    nsDuration          = 1000*1000*1000*(endTime.tv_sec-startTime.tv_sec) + endTime.tv_nsec-startTime.tv_nsec;
+    avg_sec_per_testRun = ((double)nsDuration / testRuns) / (1000*1000*1000);
+ 
+    printf("\n testRuns: %lu CPU frequency: %lu HIST_SIZE: %u frequency divisor: %u \n", testRuns,     cpuFrequency,      HIST_SIZE,    frequencyDivisor );
+    #ifdef PRETTY_HISTOGRAM
+        for ( int i=0 ; i<HIST_SIZE ; i++ ) {
+            if (histo[i] != 0 ) {
+                uint64_t h = i * HIST_SLOT_WIDTH;  // ns position of current slot
+                if      ( h > 10000000 ) printf("%7.2f ms (%6i): %10lu\n", (double)((double)HIST_SLOT_WIDTH*i/1000000), i, histo[i] );
+                else if ( h > 10000    ) printf("%7.2f us (%6i): %10lu\n", (double)((double)HIST_SLOT_WIDTH*i/1000   ), i, histo[i] );
+                else                     printf("%7d ns (%6i): %10lu\n", HIST_SLOT_WIDTH*i, i, histo[i] );
+            }
+       }
+    #else
+        for ( int i=0 ; i<HIST_SIZE ; i++ ) {
+            if (histo[i] != 0 ) printf(" %6i: %10lu\n", i, histo[i]);
+        }
+    #endif
+    printf("\n  %u overflows :\n", overflows);
+    for ( int i=0 ; i<overflows ; i++ ) {
+        printf("%10f sec (iteration %10lu): ", avg_sec_per_testRun*ovValue[i].iteration, ovValue[i].iteration );
+        printf("val=%8u gap=%10f sec\n", ovValue[i].value, sec_per_histSlot*ovValue[i].value );
+    }
+    exit(0);
+}
 
 int main() {
-	
-    uint32_t diff;
-    uint64_t histo[HIST_SIZE] = {0};
-    uint64_t testRuns;
-    uint32_t overflows=0;
-    ov_type  ovValue[OVERF_SIZE];
-    uint64_t start, end;
-    struct timespec startTime,endTime;
-    uint64_t nsDuration;
-    double avg_sec_per_testRun, sec_per_histSlot;
-
+	signal(SIGINT, print_histogram);
 	// Serup timing parameter
  	cpuFrequency     = getCpuFrequency();
  	frequencyDivisor = (cpuFrequency*HIST_SLOT_WIDTH) / (1000*1000*1000);
@@ -50,8 +78,7 @@ int main() {
 		start = read_tsc();
         end   = read_tscp();
 		diff  = (end-start) / frequencyDivisor;  // diff in selected slot size
-		if(i < testRuns*0.1) continue;
-        if (diff < HIST_SIZE) {
+		if (diff < HIST_SIZE) {
 			histo[diff]++;
 		} else {
 			if ( OVERF_SIZE > overflows ) {
@@ -73,33 +100,6 @@ int main() {
  * ^^^^^^^^^^^^^^^^^^
  * End of measurement
  */
-
-	sec_per_histSlot = 1.*frequencyDivisor / cpuFrequency;
-	nsDuration          = 1000*1000*1000*(endTime.tv_sec-startTime.tv_sec) + endTime.tv_nsec-startTime.tv_nsec;
-	avg_sec_per_testRun = ((double)nsDuration / testRuns) / (1000*1000*1000);
-	
-	printf("\n testRuns: %lu CPU frequency: %lu HIST_SIZE: %u frequency divisor: %u \n",
-			   testRuns,     cpuFrequency,      HIST_SIZE,    frequencyDivisor );
-	#ifdef PRETTY_HISTOGRAM
-	    for ( int i=0 ; i<HIST_SIZE ; i++ ) {
-	    	if (histo[i] != 0 ) {
-				uint64_t h = i * HIST_SLOT_WIDTH;  // ns position of current slot
-				if      ( h > 10000000 ) printf("%7.2f ms (%6i): %10lu\n", (double)((double)HIST_SLOT_WIDTH*i/1000000), i, histo[i] );
-				else if ( h > 10000    ) printf("%7.2f us (%6i): %10lu\n", (double)((double)HIST_SLOT_WIDTH*i/1000   ), i, histo[i] );
-				else                     printf("%7d ns (%6i): %10lu\n", HIST_SLOT_WIDTH*i, i, histo[i] );
-			}
-	    }	
-	#else
-	    for ( int i=0 ; i<HIST_SIZE ; i++ ) {
-	    	if (histo[i] != 0 ) printf(" %6i: %10lu\n", i, histo[i]);
-	    }
-	#endif
-    printf("\n  %u overflows :\n", overflows);
-    for ( int i=0 ; i<overflows ; i++ ) {
-    	printf("%10f sec (iteration %10lu): ", avg_sec_per_testRun*ovValue[i].iteration, ovValue[i].iteration );
-    	printf("val=%8u gap=%10f sec\n", ovValue[i].value, sec_per_histSlot*ovValue[i].value );
-    }
-
+    print_histogram();
     return 0;
 }
- 

@@ -10,3 +10,24 @@
     120 ns (   120):      13243
     132 ns (   132):      63000
     144 ns (   144):       9841
+
+
+
+getCpuFrequency(): value  0: 3600234828
+getCpuFrequency(): value  1: 3600225360
+getCpuFrequency(): value  2: 3600229896
+getCpuFrequency(): value  3: 3600215460
+getCpuFrequency(): value  4: 3600224424
+getCpuFrequency(): returning 3600225993
+main(): received cpuFrequency: 3600225993 calculated frequencyDivisor: 3
+^C
+ testRuns: 400000000000 CPU frequency: 3600225993 HIST_SIZE: 10000 frequency divisor: 3 
+     36 ns (    36): 13861697139
+     48 ns (    48): 146058239102
+     60 ns (    60): 16259153082
+     72 ns (    72): 92070115974
+     84 ns (    84):          1
+     96 ns (    96):          2
+    108 ns (   108):          6
+    264 ns (   264):          1
+    288 ns (   288):          1
